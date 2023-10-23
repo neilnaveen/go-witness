@@ -49,7 +49,7 @@ func NewMemorySource() *MemorySource {
 func (s *MemorySource) LoadFile(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("1")
 	}
 
 	defer f.Close()
@@ -59,7 +59,7 @@ func (s *MemorySource) LoadFile(path string) error {
 func (s *MemorySource) LoadReader(reference string, r io.Reader) error {
 	data, err := io.ReadAll(r)
 	if err != nil {
-		return err
+		return fmt.Errorf("2")
 	}
 
 	return s.LoadBytes(reference, data)
@@ -68,23 +68,25 @@ func (s *MemorySource) LoadReader(reference string, r io.Reader) error {
 func (s *MemorySource) LoadBytes(reference string, data []byte) error {
 	env := dsse.Envelope{}
 	if err := json.Unmarshal(data, &env); err != nil {
-		return err
+		return fmt.Errorf("3")
 	}
 
 	return s.LoadEnvelope(reference, env)
 }
 
 func (s *MemorySource) LoadEnvelope(reference string, env dsse.Envelope) error {
+	// if envelope already exist in MemorySource, it return an error
 	if _, ok := s.envelopesByReference[reference]; ok {
 		return ErrDuplicateReference(reference)
 	}
-
+	// converts the dsse envelope into a collection envelope
 	collEnv, err := envelopeToCollectionEnvelope(reference, env)
 	if err != nil {
-		return err
+		return fmt.Errorf("4")
 	}
-
+	// since this envelope is not in the MemorySource, we can add the collection envelope into the map
 	s.envelopesByReference[reference] = collEnv
+	// we do the reverse, we append to the refrence name to another map with the key being the collection envelopes name
 	s.referencesByCollectionName[collEnv.Collection.Name] = append(s.referencesByCollectionName[collEnv.Collection.Name], reference)
 	subDigestIndex := make(map[string]struct{})
 	for _, sub := range collEnv.Statement.Subject {
