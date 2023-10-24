@@ -82,7 +82,7 @@ func (s *MemorySource) LoadEnvelope(reference string, env dsse.Envelope) error {
 	// converts the dsse envelope into a collection envelope
 	collEnv, err := envelopeToCollectionEnvelope(reference, env)
 	if err != nil {
-		return fmt.Errorf("4")
+		return err
 	}
 	// since this envelope is not in the MemorySource, we can add the collection envelope into the map
 	s.envelopesByReference[reference] = collEnv

@@ -299,6 +299,9 @@ func TestArtifacts(t *testing.T) {
 	require.NoError(t, err)
 	intotoStatement2, err = intoto.NewStatement(attestation.CollectionType, step2CollectionJson, map[string]cryptoutil.DigestSet{})
 	require.NoError(t, err)
+	// json serialize the step1 collection
+	j, _ := json.Marshal(step1Collection)
+	t.Log(string(j))
 	_, err = policy.Verify(
 		context.Background(),
 		WithSubjectDigests([]string{dummySha}),
